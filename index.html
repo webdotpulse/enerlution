@@ -141,6 +141,30 @@
                             </div>
                         </div>
                     </section>
+
+                    <hr class="border-slate-100">
+
+                    <!-- Custom Item Section -->
+                    <section class="space-y-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center">
+                            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-2.5 text-xs font-semibold">03</span>
+                            <span id="ui-customItem">Extra Artikel</span>
+                        </h2>
+                        <div class="space-y-3.5">
+                            <div>
+                                <label for="customItemName" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelCustomName">Artikelnaam</label>
+                                <input type="text" id="customItemName" oninput="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all" placeholder="Bijv. Laadpaal">
+                            </div>
+                            <div>
+                                <label for="customItemSpecs" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelCustomSpecs">Specificaties</label>
+                                <input type="text" id="customItemSpecs" oninput="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all" placeholder="Bijv. 11kW 3-Fase">
+                            </div>
+                            <div>
+                                <label for="customItemPrice" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelCustomPrice">Prijs (excl. btw)</label>
+                                <input type="number" id="customItemPrice" step="0.01" oninput="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all" placeholder="0.00">
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
 
@@ -318,7 +342,8 @@
                 instName: "Installatie & Indienstname", instSpec: "Standaard fysieke plaatsing & bekabeling",
                 areiName: "AREI Keuring", areiSpec: "Verplichte externe elektrische keuring",
                 bebatName: "Bebat Milieubijdrage", bebatSpec: "€2,89 per kg voor {weight} kg",
-                footerNote: "Opmerking: De Bebat-milieubijdrage is een verplichte, allesomvattende kost voor het inzamelen en recycleren van batterijen. Bebat milieubijdrage is berekend op €2,89/kg."
+                footerNote: "Opmerking: De Bebat-milieubijdrage is een verplichte, allesomvattende kost voor het inzamelen en recycleren van batterijen. Bebat milieubijdrage is berekend op €2,89/kg.",
+                lCustomItem: "Extra Artikel", lCustomName: "Artikelnaam", lCustomSpecs: "Specificaties", lCustomPrice: "Prijs (excl. btw)"
             },
             en: {
                 title: "Enerlution Configurator", sub: "Smart sizing for hybrid inverters and battery storage.",
@@ -340,7 +365,8 @@
                 instName: "Installation & Commissioning", instSpec: "Standard physical placement & wiring",
                 areiName: "AREI Inspection", areiSpec: "Mandatory external electrical inspection",
                 bebatName: "Bebat Environmental Fee", bebatSpec: "€2.89 per kg for {weight} kg",
-                footerNote: "Note: The Bebat environmental fee is a mandatory, all-inclusive cost for the collection and recycling of batteries. The Bebat environmental fee is calculated at €2.89/kg."
+                footerNote: "Note: The Bebat environmental fee is a mandatory, all-inclusive cost for the collection and recycling of batteries. The Bebat environmental fee is calculated at €2.89/kg.",
+                lCustomItem: "Custom Item", lCustomName: "Item Name", lCustomSpecs: "Specifications", lCustomPrice: "Price (excl. VAT)"
             }
         };
 
@@ -403,6 +429,11 @@
 
             document.getElementById('ui-labelTax').innerText = t.lTax;
             document.getElementById('ui-tax0').innerText = t.tax0;
+
+            document.getElementById('ui-customItem').innerText = t.lCustomItem;
+            document.getElementById('ui-labelCustomName').innerText = t.lCustomName;
+            document.getElementById('ui-labelCustomSpecs').innerText = t.lCustomSpecs;
+            document.getElementById('ui-labelCustomPrice').innerText = t.lCustomPrice;
             
             document.getElementById('ui-exportBtn').innerText = t.btnExport;
             
@@ -527,6 +558,18 @@
                 { name: t.areiName, specs: t.areiSpec, price: fixedCosts.arei.price },
                 { name: t.bebatName, specs: t.bebatSpec.replace('{weight}', selectedBattery.weight.toFixed(1)), price: bebatCost }
             );
+
+            const customItemName = document.getElementById('customItemName').value;
+            const customItemSpecs = document.getElementById('customItemSpecs').value;
+            const customItemPrice = document.getElementById('customItemPrice').value;
+
+            if (customItemName.trim() !== '') {
+                items.push({
+                    name: customItemName,
+                    specs: customItemSpecs,
+                    price: parseFloat(customItemPrice) || 0
+                });
+            }
 
             items.forEach(item => {
                 subtotal += item.price;
