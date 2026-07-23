@@ -731,7 +731,7 @@ Highlight self-consumption optimization and financial benefits under the Flemish
             doc.line(leftMargin, y, rightMargin, y);
 
             const apiKey = getApiKey();
-            if (apiKey && latestAiAdviceText) {
+            if (latestAiAdviceText) {
                 // AI Advisor Section in PDF
                 y += 8;
                 doc.setFont("helvetica", "bold");
@@ -814,6 +814,15 @@ Highlight self-consumption optimization and financial benefits under the Flemish
             doc.text(String(activeData.t.lTot || 'Totaal'), boxLeft + 5, boxY);
             doc.setTextColor(30, 64, 175);
             doc.text(`€${Number(activeData.total || 0).toFixed(2).replace('.', ',')}`, rightMargin - 5, boxY, { align: 'right' });
+
+            // Footer Note
+            y = boxY + 12;
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(7.5);
+            doc.setTextColor(156, 163, 175);
+            const footerText = String(activeData.t.footerNote || "Opmerking: De Bebat-milieubijdrage is een verplichte, allesomvattende kost voor het inzamelen en recycleren van batterijen. Bebat milieubijdrage is berekend op €2,89/kg.");
+            const splitFooter = doc.splitTextToSize(footerText, rightMargin - leftMargin);
+            doc.text(splitFooter, leftMargin, y);
 
             // Save PDF cleanly
             const safeName = String(activeData.clientName || 'Klant').replace(/\s+/g, '_');
