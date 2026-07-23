@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enerlution Configurator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        input[type=range] { accent-color: #2563eb; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 min-h-screen text-slate-800 pb-16">
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <!-- Modern Header -->
+        <header class="mb-10 flex flex-col sm:flex-row justify-between items-center glass-panel p-6 rounded-2xl shadow-sm border border-slate-200/60">
+            <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" id="ui-title">Enerlution Configurator</h1>
+                    <p class="text-slate-500 text-sm mt-0.5" id="ui-subtitle">Slimme dimensionering voor hybride omvormers en batterijopslag.</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openSettingsModal()" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold p-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center" title="Instellingen & API Key">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+                <button onclick="toggleLanguage()" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all text-xs tracking-wider flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+                    <span id="langBtnText">EN (English)</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Column: Input Form -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-6 sm:p-7 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 space-y-6">
+                    
+                    <!-- Client Section -->
+                    <section class="space-y-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center">
+                            <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 text-xs font-semibold">01</span>
+                            <span id="ui-clientInfo">Klantgegevens</span>
+                        </h2>
+                        <div class="space-y-3.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelName">Naam</label>
+                                <input type="text" id="clientName" oninput="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all" placeholder="Jan Peeters">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelAddress">Adres</label>
+                                <input type="text" id="clientAddress" oninput="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all" placeholder="Zonnestraat 123, Antwerpen">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelTax">Btw-tarief</label>
+                                <select id="taxRate" onchange="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all">
+                                    <option value="0" id="ui-tax0">0% (Medecontractant)</option>
+                                    <option value="6" selected>6%</option>
+                                    <option value="21">21%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <hr class="border-slate-100">
+
+                    <!-- Technical Specs Section -->
+                    <section class="space-y-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-2.5 text-xs font-semibold">02</span>
+                            <span id="ui-techSpecs">Technische Specificaties</span>
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelGrid">Netaansluiting</label>
+                                <select id="gridType" onchange="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all">
+                                    <option value="1F" id="ui-grid1F">Monofase (1F)</option>
+                                    <option value="3F400" id="ui-grid3F400">Driefasig 400V + N</option>
+                                    <option value="3F230" id="ui-grid3F230">Driefasig 3x230V (Zonder N)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider" id="ui-labelPV">Zonnepanelen (PV) in kWp</label>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" min="0" max="25" step="0.1" value="5.0" id="pvSlider" oninput="document.getElementById('solarPower').value = this.value; calculateSystem()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="solarPower" step="0.1" value="5.0" oninput="document.getElementById('pvSlider').value = this.value; calculateSystem()" class="w-20 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 text-center font-bold text-sm p-2.5">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider" id="ui-labelCons">Jaarlijks Verbruik in kWh</label>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" min="0" max="20000" step="100" value="3500" id="consSlider" oninput="document.getElementById('annualConsumption').value = this.value; calculateSystem()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="annualConsumption" step="100" value="3500" oninput="document.getElementById('consSlider').value = this.value; calculateSystem()" class="w-20 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 text-center font-bold text-sm p-2.5">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider" id="ui-labelInj">Jaarlijkse Netinjectie in kWh</label>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" min="0" max="15000" step="100" value="2500" id="injSlider" oninput="document.getElementById('annualInjection').value = this.value; calculateSystem()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="number" id="annualInjection" step="100" value="2500" oninput="document.getElementById('annualInjection').value = this.value; calculateSystem()" class="w-20 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 text-center font-bold text-sm p-2.5">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors cursor-pointer" onclick="document.getElementById('hasEV').click(); event.stopPropagation();">
+                                <input id="hasEV" type="checkbox" onchange="calculateSystem()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
+                                <label for="hasEV" class="ml-3 block text-xs font-semibold text-blue-900 cursor-pointer w-full select-none" id="ui-labelEV">
+                                    Klant heeft een elektrische wagen (EV)
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Right Column: Proposal Preview -->
+            <div class="lg:col-span-7 space-y-4">
+                <div id="pdfContent" class="bg-white p-8 sm:p-10 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 space-y-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-bl-full pointer-events-none -z-0"></div>
+
+                    <!-- Proposal Header -->
+                    <div class="border-b border-slate-100 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end relative z-10">
+                        <div>
+                            <span class="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold text-[10px] uppercase tracking-widest rounded-full" id="ui-propTitle">Offerte</span>
+                            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight mt-2" id="outClientName">Beste Klant</h2>
+                            <p class="text-xs text-slate-400 mt-0.5" id="outClientAddress">-</p>
+                        </div>
+                        <div class="text-left sm:text-right mt-4 sm:mt-0 text-xs text-slate-500 space-y-0.5">
+                            <p class="font-semibold text-slate-700" id="ui-propSubtitle">Enerlution Configurator</p>
+                            <p id="outDate" class="text-slate-400 font-mono"></p>
+                        </div>
+                    </div>
+
+                    <!-- Gemini AI Advisor Section (Automatic, hidden if no API key) -->
+                    <div id="aiAdvisorContainer" class="relative z-10 bg-gradient-to-br from-indigo-50/70 to-blue-50/40 p-5 rounded-xl border border-indigo-100/80 shadow-xs hidden">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-900" id="ui-aiTitle">Energie Advies</h3>
+                        </div>
+                        <div id="aiAdvisorOutput" class="text-xs sm:text-sm text-indigo-950/90 leading-relaxed font-normal">
+                            <span class="italic opacity-70" id="aiLoadingText">AI-analyse wordt automatisch geladen...</span>
+                        </div>
+                    </div>
+
+                    <!-- Bill of Materials -->
+                    <div class="relative z-10 space-y-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800" id="ui-bomTitle">Materialenlijst</h3>
+                        <div class="overflow-hidden rounded-xl border border-slate-100 bg-white">
+                            <table class="min-w-full divide-y divide-slate-100 text-xs sm:text-sm">
+                                <thead class="bg-slate-50/80">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider text-[11px]" id="th-item">Artikel</th>
+                                        <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider text-[11px]" id="th-specs">Specificaties</th>
+                                        <th scope="col" class="px-4 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider text-[11px]" id="th-price">Prijs (excl. btw)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bomTable" class="divide-y divide-slate-100 bg-white">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="relative z-10 flex justify-end pt-2">
+                        <div class="w-full sm:w-2/3">
+                            <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-100 space-y-2.5">
+                                <div class="flex justify-between text-slate-600 text-xs">
+                                    <span id="outSubtotalLabel">Subtotaal (excl. btw)</span>
+                                    <span id="outSubtotal" class="font-semibold text-slate-800">€0,00</span>
+                                </div>
+                                <div class="flex justify-between text-slate-600 text-xs border-b border-slate-200/60 pb-2.5">
+                                    <span id="outTaxLabel">Btw (6%)</span>
+                                    <span id="outTax" class="font-semibold text-slate-800">€0,00</span>
+                                </div>
+                                <div class="flex justify-between text-slate-900 font-bold text-base pt-1">
+                                    <span id="outTotalLabel">Totaal</span>
+                                    <span id="outTotal" class="text-blue-700 font-extrabold text-lg">€0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="doc-footer" class="relative z-10 text-[11px] text-slate-400 text-center border-t border-slate-100 pt-4 leading-relaxed">
+                        <!-- Footer note -->
+                    </div>
+
+                    <!-- Export PDF Button at Bottom of Preview -->
+                    <div class="relative z-10 pt-4 flex justify-end">
+                        <button onclick="exportToPDF()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl inline-flex items-center text-sm shadow-lg shadow-blue-500/20 transition-all transform hover:-translate-y-0.5">
+                            <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+                            <span id="ui-exportBtn">Exporteer PDF</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal for Private Hosting API Key -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5 border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <h3 class="font-bold text-slate-900 text-lg flex items-center">
+                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                    Instellingen & API Key
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Gemini API Sleutel (Voor Private Hosting)</label>
+                <input type="password" id="apiKeyInput" placeholder="Plak hier je Gemini API key..." class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Opmerking: Binnen de Canvas omgeving is dit niet nodig (de sleutel wordt automatisch geregeld). Alleen nodig als je dit bestand zelf host op bijvoorbeeld GitHub Pages of Netlify.
+                </p>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all">Annuleren</button>
+                <button onclick="saveApiKey()" class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inverters = [
+            // Single Phase HV
+            { id: 'HYSH-3000', type: '1-phase', hv: true, power: 3.0, maxPv: 4.95, price: 879.20 },
+            { id: 'HYSH-3680', type: '1-phase', hv: true, power: 3.68, maxPv: 5.52, price: 882.00 },
+            { id: 'HYSH-5000-B', type: '1-phase', hv: true, power: 5.0, maxPv: 7.50, price: 884.80 },
+            // Single Phase LV
+            { id: 'HYSL-3000', type: '1-phase', hv: false, power: 3.0, maxPv: 6.00, price: 889.00 },
+            { id: 'HYSL-3680', type: '1-phase', hv: false, power: 3.68, maxPv: 7.36, price: 922.60 },
+            { id: 'HYSL-4000', type: '1-phase', hv: false, power: 4.0, maxPv: 8.00, price: 922.60 },
+            { id: 'HYSL-5000-B', type: '1-phase', hv: false, power: 5.0, maxPv: 10.00, price: 935.20 },
+            // Three Phase HV
+            { id: 'HYTH-5000', type: '3-phase', hv: true, power: 5.0, maxPv: 7.50, price: 1387.40 },
+            { id: 'HYTH-6000', type: '3-phase', hv: true, power: 6.0, maxPv: 9.00, price: 1390.20 },
+            { id: 'HYTH-8000', type: '3-phase', hv: true, power: 8.0, maxPv: 12.00, price: 1393.00 },
+            { id: 'HYTH-10000-B', type: '3-phase', hv: true, power: 10.0, maxPv: 15.00, price: 1432.20 },
+            { id: 'HYTH-10000', type: '3-phase', hv: true, power: 10.0, maxPv: 15.00, price: 1439.20 },
+            { id: 'HYTH-12000', type: '3-phase', hv: true, power: 12.0, maxPv: 18.00, price: 1449.00 },
+            { id: 'HYTH-15000', type: '3-phase', hv: true, power: 15.0, maxPv: 18.00, price: 1603.00 }
+        ];
+
+        const batteries = [
+            // LV Batteries
+            { id: 'LFPWall-5000', type: 'LV', capacity: 5.12, weight: 49.5, price: 1260.00 },
+            { id: 'LFPWall-10K-V2', type: 'LV', capacity: 10.44, weight: 96.0, price: 1990.00 },
+            { id: 'Roller-16K', type: 'LV', capacity: 16.07, weight: 112.6, price: 2540.00 },
+            // HV Batteries
+            { id: 'GroundHV-7.5K', type: 'HV', capacity: 7.48, weight: 84.5, price: 3000.00 },
+            { id: 'GroundHV-10K', type: 'HV', capacity: 9.98, weight: 105.0, price: 3770.00 },
+            { id: 'GroundHV-12.5K', type: 'HV', capacity: 12.48, weight: 129.0, price: 3405.00 },
+            { id: 'GroundHV-15K', type: 'HV', capacity: 14.97, weight: 152.3, price: 3982.50 },
+            { id: 'GroundHV-17.5K', type: 'HV', capacity: 17.47, weight: 176.2, price: 4560.00 },
+            { id: 'GroundHV-20K', type: 'HV', capacity: 19.96, weight: 199.5, price: 5137.50 }
+        ];
+
+        const fixedCosts = {
+            installation: { price: 325.00 },
+            meter: { price: 125.00 },
+            arei: { price: 155.00 },
+            bebatPerKg: 2.89 
+        };
+
+        const translations = {
+            nl: {
+                title: "Enerlution Configurator", sub: "Slimme dimensionering voor hybride omvormers en batterijopslag.",
+                btnLang: "EN (English)",
+                defaultClient: "Beste Klant",
+                lInfo: "Klantgegevens", lName: "Naam", lAddr: "Adres",
+                lTax: "Btw-tarief", tax0: "0% (Medecontractant)",
+                lTech: "Technische Specificaties", lGrid: "Netaansluiting",
+                g1: "Monofase (1F)", g3: "Driefasig 400V + N", g3n: "Driefasig 3x230V (Zonder N)",
+                lPV: "Zonnepanelen (PV) in kWp", lCons: "Jaarlijks Verbruik in kWh", lInj: "Jaarlijkse Netinjectie in kWh", lEV: "Klant heeft een elektrische wagen (EV)",
+                btnExport: "Exporteer PDF",
+                propTitle: "Offerte", propSub: "Gegenereerd door Enerlution Configurator",
+                aiTitle: "Energie Advies", aiLoading: "AI-analyse wordt automatisch geladen...",
+                bomTitle: "Materialenlijst", thItem: "Artikel", thSpecs: "Specificaties", thPrice: "Prijs (excl. btw)",
+                lSubt: "Subtotaal (excl. btw)", lTot: "Totaal",
+                invName: "Enerlution Hybride Omvormer", batName: "Enerlution Batterijsysteem",
+                meterName: "Energiemeter (Eastron)", meterSpec: "Nodig voor 3x230V netmeting",
+                instName: "Installatie & Indienstname", instSpec: "Standaard fysieke plaatsing & bekabeling",
+                areiName: "AREI Keuring", areiSpec: "Verplichte externe elektrische keuring",
+                bebatName: "Bebat Milieubijdrage", bebatSpec: "€2,89 per kg voor {weight} kg",
+                footerNote: "Opmerking: De Bebat-milieubijdrage is een verplichte, allesomvattende kost voor het inzamelen en recycleren van batterijen. Bebat milieubijdrage is berekend op €2,89/kg."
+            },
+            en: {
+                title: "Enerlution Configurator", sub: "Smart sizing for hybrid inverters and battery storage.",
+                btnLang: "NL (Nederlands)",
+                defaultClient: "Dear Customer",
+                lInfo: "Customer Details", lName: "Name", lAddr: "Address",
+                lTax: "VAT Rate", tax0: "0% (Co-contractor)",
+                lTech: "Technical Specifications", lGrid: "Grid Connection",
+                g1: "Single Phase (1F)", g3: "Three Phase 400V + N", g3n: "Three Phase 3x230V (Without N)",
+                lPV: "Solar Panels (PV) in kWp", lCons: "Annual Consumption in kWh", lInj: "Annual Grid Injection in kWh", lEV: "Customer has an Electric Vehicle (EV)",
+                btnExport: "Export PDF",
+                propTitle: "Quotation", propSub: "Generated by Enerlution Configurator",
+                aiTitle: "Energy Advice", aiLoading: "AI energy analysis is loading automatically...",
+                bomTitle: "Bill of Materials", thItem: "Item", thSpecs: "Specifications", thPrice: "Price (excl. VAT)",
+                lSubt: "Subtotal (excl. VAT)", lTot: "Total",
+                invName: "Enerlution Hybrid Inverter", batName: "Enerlution Battery System",
+                meterName: "Energy Meter (Eastron)", meterSpec: "Required for 3x230V grid measurement",
+                instName: "Installation & Commissioning", instSpec: "Standard physical placement & wiring",
+                areiName: "AREI Inspection", areiSpec: "Mandatory external electrical inspection",
+                bebatName: "Bebat Environmental Fee", bebatSpec: "€2.89 per kg for {weight} kg",
+                footerNote: "Note: The Bebat environmental fee is a mandatory, all-inclusive cost for the collection and recycling of batteries. The Bebat environmental fee is calculated at €2.89/kg."
+            }
+        };
+
+        let currentLang = 'nl';
+        let latestQuoteData = {}; 
+        let aiDebounceTimer = null;
+        let latestAiAdviceText = "";
+
+        function openSettingsModal() {
+            document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+            } else {
+                localStorage.removeItem('gemini_api_key');
+            }
+            closeSettingsModal();
+            calculateSystem(); 
+        }
+
+        function getApiKey() {
+            return localStorage.getItem('gemini_api_key') || '';
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'nl' ? 'en' : 'nl';
+            const t = translations[currentLang];
+            
+            document.getElementById('langBtnText').innerText = t.btnLang;
+            document.getElementById('ui-title').innerText = t.title;
+            document.getElementById('ui-subtitle').innerText = t.sub;
+            
+            document.getElementById('ui-clientInfo').innerText = t.lInfo;
+            document.getElementById('ui-labelName').innerText = t.lName;
+            document.getElementById('ui-labelAddress').innerText = t.lAddr;
+            
+            document.getElementById('ui-techSpecs').innerText = t.lTech;
+            document.getElementById('ui-labelGrid').innerText = t.lGrid;
+            document.getElementById('ui-grid1F').innerText = t.g1;
+            document.getElementById('ui-grid3F400').innerText = t.g3;
+            document.getElementById('ui-grid3F230').innerText = t.g3n;
+            
+            document.getElementById('ui-labelPV').innerText = t.lPV;
+            document.getElementById('ui-labelCons').innerText = t.lCons;
+            document.getElementById('ui-labelInj').innerText = t.lInj;
+            document.getElementById('ui-labelEV').innerText = t.lEV;
+
+            document.getElementById('ui-labelTax').innerText = t.lTax;
+            document.getElementById('ui-tax0').innerText = t.tax0;
+            
+            document.getElementById('ui-exportBtn').innerText = t.btnExport;
+            
+            document.getElementById('ui-propTitle').innerText = t.propTitle;
+            document.getElementById('ui-propSubtitle').innerText = t.propSub;
+            document.getElementById('ui-aiTitle').innerText = t.aiTitle;
+            document.getElementById('aiLoadingText').innerText = t.aiLoading;
+            document.getElementById('ui-bomTitle').innerText = t.bomTitle;
+            
+            document.getElementById('th-item').innerText = t.thItem;
+            document.getElementById('th-specs').innerText = t.thSpecs;
+            document.getElementById('th-price').innerText = t.thPrice;
+            document.getElementById('outSubtotalLabel').innerText = t.lSubt;
+            document.getElementById('outTotalLabel').innerText = t.lTot;
+            document.getElementById('doc-footer').innerText = t.footerNote;
+
+            calculateSystem();
+        }
+
+        function calculateSystem() {
+            const t = translations[currentLang];
+            
+            const clientName = document.getElementById('clientName').value || t.defaultClient;
+            const clientAddress = document.getElementById('clientAddress').value || '-';
+            const gridType = document.getElementById('gridType').value;
+            const solarPower = parseFloat(document.getElementById('solarPower').value) || 0;
+            const annualConsumption = parseFloat(document.getElementById('annualConsumption').value) || 0;
+            const annualInjection = parseFloat(document.getElementById('annualInjection').value) || 0;
+            const hasEV = document.getElementById('hasEV').checked;
+            const taxRate = parseFloat(document.getElementById('taxRate').value);
+
+            let selectedInverter = null;
+            let selectedBattery = null;
+
+            let targetCapacity = Math.max(5.0, (annualConsumption / 1000) * 1.5 + (annualInjection / 1000) * 0.8);
+            if (hasEV) {
+                targetCapacity += 7.0; 
+            } else if (annualInjection > 3000) {
+                targetCapacity += 3.0;
+            }
+
+            let isHV = true; 
+            if (gridType === '1F' || gridType === '3F230') {
+                if (targetCapacity <= 16.5) {
+                    isHV = false; 
+                }
+            }
+
+            let targetAcPower = solarPower * 0.75; 
+            
+            if (gridType === '3F400') {
+                let suitable = inverters.filter(i => i.type === '3-phase' && i.power >= targetAcPower);
+                if (suitable.length === 0) suitable = [inverters.find(i => i.id === 'HYTH-15000')];
+                selectedInverter = suitable[0];
+            } else {
+                let maxAllowedPower = Math.min(targetAcPower, 5.0); 
+                let suitable = inverters.filter(i => i.type === '1-phase' && i.hv === isHV && i.power >= maxAllowedPower);
+                if (suitable.length === 0) suitable = [inverters.filter(i => i.type === '1-phase' && i.hv === isHV).pop()];
+                selectedInverter = suitable[0];
+            }
+
+            let compatibleBatteries = batteries.filter(b => b.type === (isHV ? 'HV' : 'LV'));
+            let suitableBattery = compatibleBatteries.find(b => b.capacity >= targetCapacity);
+            if (!suitableBattery) suitableBattery = compatibleBatteries[compatibleBatteries.length - 1]; 
+            selectedBattery = suitableBattery;
+
+            document.getElementById('outClientName').innerText = clientName;
+            document.getElementById('outClientAddress').innerText = clientAddress;
+            const dateStr = new Date().toLocaleDateString(currentLang === 'nl' ? 'nl-BE' : 'en-US');
+            document.getElementById('outDate').innerText = dateStr;
+            document.getElementById('doc-footer').innerText = t.footerNote;
+
+            const tbody = document.getElementById('bomTable');
+            tbody.innerHTML = ''; 
+
+            let subtotal = 0;
+            const bebatCost = selectedBattery.weight * fixedCosts.bebatPerKg;
+
+            const items = [
+                { name: t.invName, specs: selectedInverter.id, price: selectedInverter.price },
+                { name: t.batName, specs: `${selectedBattery.id} (${selectedBattery.capacity.toFixed(1)} kWh)`, price: selectedBattery.price }
+            ];
+
+            if (gridType === '3F230') {
+                items.push({ name: t.meterName, specs: t.meterSpec, price: fixedCosts.meter.price });
+            }
+
+            items.push(
+                { name: t.instName, specs: t.instSpec, price: fixedCosts.installation.price },
+                { name: t.areiName, specs: t.areiSpec, price: fixedCosts.arei.price },
+                { name: t.bebatName, specs: t.bebatSpec.replace('{weight}', selectedBattery.weight.toFixed(1)), price: bebatCost }
+            );
+
+            items.forEach(item => {
+                subtotal += item.price;
+                const row = `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="px-4 py-3 whitespace-nowrap font-medium text-slate-900">${item.name}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-slate-500">${item.specs}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-slate-900 text-right font-medium">€${item.price.toFixed(2).replace('.', ',')}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            const taxAmount = subtotal * (taxRate / 100);
+            const total = subtotal + taxAmount;
+
+            document.getElementById('outSubtotal').innerText = `€${subtotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('outTaxLabel').innerText = currentLang === 'nl' ? `Btw (${taxRate}%)` : `VAT (${taxRate}%)`;
+            document.getElementById('outTax').innerText = `€${taxAmount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('outTotal').innerText = `€${total.toFixed(2).replace('.', ',')}`;
+
+            latestQuoteData = {
+                clientName, clientAddress, dateStr, items, subtotal, taxRate, taxAmount, total, t
+            };
+
+            const apiKey = getApiKey();
+            const aiContainer = document.getElementById('aiAdvisorContainer');
+            if (!apiKey) {
+                aiContainer.classList.add('hidden');
+            } else {
+                aiContainer.classList.remove('hidden');
+                clearTimeout(aiDebounceTimer);
+                aiDebounceTimer = setTimeout(() => {
+                    callGeminiAdvisorAutomatic();
+                }, 800);
+            }
+        }
+
+        async function callGeminiAdvisorAutomatic() {
+            const output = document.getElementById('aiAdvisorOutput');
+            const t = translations[currentLang];
+            
+            output.innerHTML = `<span class="italic opacity-60">${t.aiLoading}</span>`;
+
+            const d = latestQuoteData;
+            const solar = document.getElementById('solarPower').value;
+            const cons = document.getElementById('annualConsumption').value;
+            const inj = document.getElementById('annualInjection').value;
+            const grid = document.getElementById('gridType').value;
+            const ev = document.getElementById('hasEV').checked ? (currentLang === 'nl' ? 'Ja' : 'Yes') : (currentLang === 'nl' ? 'Nee' : 'No');
+
+            const prompt = `Act as an expert solar and battery energy consultant in Flanders, Belgium. Write a concise, professional, and encouraging energy advisory summary (in ${currentLang === 'nl' ? 'Dutch' : 'English'}) for client ${d.clientName || 'Klant'}. System parameters: Solar PV: ${solar} kWp, Annual Consumption: ${cons} kWh, Annual Injection: ${inj} kWh, Grid type: ${grid}, Electric Vehicle: ${ev}, Selected Inverter: ${d.items[0]?.specs || ''}, Selected Battery: ${d.items[1]?.specs || ''}. Highlight self-consumption optimization and financial benefits under the Flemish energy market. Keep it to 1 professional paragraph.`;
+
+            const systemPrompt = "You are a professional renewable energy consultant specializing in hybrid inverters and LFP batteries.";
+            const apiKey = getApiKey();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            let success = false;
+            let resultText = "";
+            let delay = 1000;
+
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('API error');
+                    const resJson = await response.json();
+                    const candidate = resJson.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        resultText = candidate.content.parts[0].text;
+                        success = true;
+                        break;
+                    }
+                } catch (e) {
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+
+            if (success) {
+                latestAiAdviceText = resultText;
+                output.innerHTML = `<p class="text-indigo-950">${resultText}</p>`;
+            } else {
+                latestAiAdviceText = currentLang === 'nl' ? 'Advies op maat wordt geladen op basis van geselecteerde specificaties.' : 'Customized advice is loading based on selected specifications.';
+                output.innerHTML = `<p class="text-slate-500 italic">${latestAiAdviceText}</p>`;
+            }
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+            
+            const d = latestQuoteData;
+            if (!d || !d.t) {
+                calculateSystem();
+            }
+            const activeData = latestQuoteData;
+
+            let y = 20;
+            const leftMargin = 15;
+            const rightMargin = 195;
+
+            // Title
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(20);
+            doc.setTextColor(30, 64, 175); 
+            doc.text(String(activeData.t.propTitle || 'Offerte'), leftMargin, y);
+
+            // Client Info Right-Aligned
+            doc.setFontSize(10);
+            doc.setTextColor(75, 85, 99);
+            doc.text(String(activeData.clientName || ''), rightMargin, y, { align: 'right' });
+            y += 5;
+            doc.text(String(activeData.clientAddress || ''), rightMargin, y, { align: 'right' });
+            y += 5;
+            doc.text(String(activeData.dateStr || ''), rightMargin, y, { align: 'right' });
+
+            y += 4;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8.5);
+            doc.setTextColor(156, 163, 175);
+            doc.text(String(activeData.t.propSubtitle || ''), leftMargin, y);
+
+            // Divider Line
+            y += 6;
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.4);
+            doc.line(leftMargin, y, rightMargin, y);
+
+            const apiKey = getApiKey();
+            if (apiKey && latestAiAdviceText) {
+                // AI Advisor Section in PDF
+                y += 8;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(10);
+                doc.setTextColor(79, 70, 229);
+                doc.text(String(activeData.t.aiTitle || 'Energie Advies'), leftMargin, y);
+
+                y += 5;
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(49, 46, 129);
+                const aiTextToPrint = String(latestAiAdviceText || '');
+                const splitAi = doc.splitTextToSize(aiTextToPrint, rightMargin - leftMargin);
+                doc.text(splitAi, leftMargin, y);
+                y += (splitAi.length * 4.5) + 6;
+            }
+
+            // BOM Section Header
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(31, 41, 55);
+            doc.text(String(activeData.t.bomTitle || 'Materialenlijst'), leftMargin, y);
+            y += 5;
+
+            // Table Header Background
+            doc.setFillColor(248, 250, 252);
+            doc.rect(leftMargin, y, rightMargin - leftMargin, 8, 'F');
+            
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(8.5);
+            doc.setTextColor(100, 116, 139);
+            doc.text(String(activeData.t.thItem || 'Artikel').toUpperCase(), leftMargin + 3, y + 5.5);
+            doc.text(String(activeData.t.thSpecs || 'Specificaties').toUpperCase(), leftMargin + 75, y + 5.5);
+            doc.text(String(activeData.t.thPrice || 'Prijs').toUpperCase(), rightMargin - 3, y + 5.5, { align: 'right' });
+            y += 8;
+
+            // Table Rows
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(17, 24, 39);
+
+            if (activeData.items && Array.isArray(activeData.items)) {
+                activeData.items.forEach((item, index) => {
+                    if (index % 2 === 1) {
+                        doc.setFillColor(249, 250, 251);
+                        doc.rect(leftMargin, y, rightMargin - leftMargin, 7.5, 'F');
+                    }
+                    doc.text(String(item.name || ''), leftMargin + 3, y + 5);
+                    doc.text(String(item.specs || ''), leftMargin + 75, y + 5);
+                    doc.text(`€${Number(item.price || 0).toFixed(2).replace('.', ',')}`, rightMargin - 3, y + 5, { align: 'right' });
+                    y += 7.5;
+                });
+            }
+
+            y += 4;
+
+            // Totals Box (Right-aligned)
+            const boxWidth = 85;
+            const boxLeft = rightMargin - boxWidth;
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(226, 232, 240);
+            doc.roundedRect(boxLeft, y, boxWidth, 24, 1.5, 1.5, 'FD');
+
+            let boxY = y + 5.5;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text(String(activeData.t.lSubt || 'Subtotaal'), boxLeft + 5, boxY);
+            doc.text(`€${Number(activeData.subtotal || 0).toFixed(2).replace('.', ',')}`, rightMargin - 5, boxY, { align: 'right' });
+
+            boxY += 5.5;
+            const taxLabel = currentLang === 'nl' ? `Btw (${activeData.taxRate}%)` : `VAT (${activeData.taxRate}%)`;
+            doc.text(taxLabel, boxLeft + 5, boxY);
+            doc.text(`€${Number(activeData.taxAmount || 0).toFixed(2).replace('.', ',')}`, rightMargin - 5, boxY, { align: 'right' });
+
+            boxY += 7.5;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10.5);
+            doc.setTextColor(17, 24, 39);
+            doc.text(String(activeData.t.lTot || 'Totaal'), boxLeft + 5, boxY);
+            doc.setTextColor(30, 64, 175);
+            doc.text(`€${Number(activeData.total || 0).toFixed(2).replace('.', ',')}`, rightMargin - 5, boxY, { align: 'right' });
+
+            // Save PDF cleanly
+            const safeName = String(activeData.clientName || 'Klant').replace(/\s+/g, '_');
+            doc.save(`Enerlution_${String(activeData.t.propTitle || 'Offerte')}_${safeName}.pdf`);
+        }
+
+        window.onload = function() {
+            calculateSystem();
+        }
+    </script>
+</body>
+</html>
