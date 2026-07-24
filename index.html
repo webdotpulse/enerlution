@@ -96,6 +96,23 @@
                                     <input aria-label="Zonnepanelen (PV) in kWp slider" type="range" min="0" max="25" step="0.1" value="5.0" id="pvSlider" oninput="document.getElementById('solarPower').value = this.value; calculateSystem()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                                     <input type="number" id="solarPower" step="0.1" value="5.0" oninput="document.getElementById('pvSlider').value = this.value; calculateSystem()" class="w-20 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 text-center font-bold text-sm p-2.5">
                                 </div>
+
+                                <div class="mt-4 space-y-3">
+                                    <label class="flex items-center p-3 bg-slate-50/50 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+                                        <input id="includeSolarInstall" type="checkbox" onchange="document.getElementById('solarInstallOptions').classList.toggle('hidden', !this.checked); calculateSystem()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
+                                        <span class="ml-3 block text-xs font-semibold text-slate-700 cursor-pointer w-full select-none" id="ui-labelIncludeSolar">
+                                            Bereken ook de installatie van de zonnepanelen
+                                        </span>
+                                    </label>
+
+                                    <div id="solarInstallOptions" class="hidden pl-2">
+                                        <label for="roofType" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1" id="ui-labelRoofType">Daktype</label>
+                                        <select id="roofType" onchange="calculateSystem()" class="block w-full rounded-xl border border-slate-200 bg-white focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm p-3 transition-all">
+                                            <option value="pitched" id="ui-optPitched">Schuin pannendak</option>
+                                            <option value="flat" id="ui-optFlat">Plat dak</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
@@ -133,12 +150,12 @@
                                 </select>
                             </div>
 
-                            <div class="flex items-center p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors cursor-pointer" onclick="document.getElementById('hasEV').click(); event.stopPropagation();">
+                            <label class="flex items-center p-3.5 bg-blue-50/50 rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors cursor-pointer">
                                 <input id="hasEV" type="checkbox" onchange="calculateSystem()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer">
-                                <label for="hasEV" class="ml-3 block text-xs font-semibold text-blue-900 cursor-pointer w-full select-none" id="ui-labelEV">
+                                <span class="ml-3 block text-xs font-semibold text-blue-900 cursor-pointer w-full select-none" id="ui-labelEV">
                                     Klant heeft een elektrische wagen (EV)
-                                </label>
-                            </div>
+                                </span>
+                            </label>
                         </div>
                     </section>
 
@@ -343,7 +360,9 @@
                 areiName: "AREI Keuring", areiSpec: "Verplichte externe elektrische keuring",
                 bebatName: "Bebat Milieubijdrage", bebatSpec: "€2,89 per kg voor {weight} kg",
                 footerNote: "Opmerking: De Bebat-milieubijdrage is een verplichte, allesomvattende kost voor het inzamelen en recycleren van batterijen. Bebat milieubijdrage is berekend op €2,89/kg.",
-                lCustomItem: "Extra Artikel", lCustomName: "Artikelnaam", lCustomSpecs: "Specificaties", lCustomPrice: "Prijs (excl. btw)"
+                lCustomItem: "Extra Artikel", lCustomName: "Artikelnaam", lCustomSpecs: "Specificaties", lCustomPrice: "Prijs (excl. btw)",
+                lIncludeSolar: "Bereken ook de installatie van de zonnepanelen", lRoofType: "Daktype", optPitched: "Schuin pannendak", optFlat: "Plat dak",
+                solarPanelsName: "Zonnepanelen", solarMountingName: "Montagemateriaal zonnepanelen", solarCablingName: "DC Bekabeling & Connectoren", solarLaborName: "Installatie Zonnepanelen", scaffoldingName: "Stelling / Valbeveiliging"
             },
             en: {
                 title: "Enerlution Configurator", sub: "Smart sizing for hybrid inverters and battery storage.",
@@ -366,7 +385,9 @@
                 areiName: "AREI Inspection", areiSpec: "Mandatory external electrical inspection",
                 bebatName: "Bebat Environmental Fee", bebatSpec: "€2.89 per kg for {weight} kg",
                 footerNote: "Note: The Bebat environmental fee is a mandatory, all-inclusive cost for the collection and recycling of batteries. The Bebat environmental fee is calculated at €2.89/kg.",
-                lCustomItem: "Custom Item", lCustomName: "Item Name", lCustomSpecs: "Specifications", lCustomPrice: "Price (excl. VAT)"
+                lCustomItem: "Custom Item", lCustomName: "Item Name", lCustomSpecs: "Specifications", lCustomPrice: "Price (excl. VAT)",
+                lIncludeSolar: "Also calculate the solar panel installation", lRoofType: "Roof Type", optPitched: "Pitched tile roof", optFlat: "Flat roof",
+                solarPanelsName: "Solar Panels", solarMountingName: "Solar Mounting Material", solarCablingName: "DC Cabling & Connectors", solarLaborName: "Solar Panel Installation", scaffoldingName: "Scaffolding / Fall Protection"
             }
         };
 
@@ -421,6 +442,11 @@
             document.getElementById('ui-labelCons').innerText = t.lCons;
             document.getElementById('ui-labelInj').innerText = t.lInj;
             document.getElementById('ui-labelEV').innerText = t.lEV;
+
+            document.getElementById('ui-labelIncludeSolar').innerText = t.lIncludeSolar;
+            document.getElementById('ui-labelRoofType').innerText = t.lRoofType;
+            document.getElementById('ui-optPitched').innerText = t.optPitched;
+            document.getElementById('ui-optFlat').innerText = t.optFlat;
 
             document.getElementById('ui-labelManualInv').innerText = t.lManualInv;
             document.getElementById('ui-labelManualBat').innerText = t.lManualBat;
@@ -569,6 +595,36 @@
                     specs: customItemSpecs,
                     price: parseFloat(customItemPrice) || 0
                 });
+            }
+
+            const includeSolarInstall = document.getElementById('includeSolarInstall').checked;
+            const roofType = document.getElementById('roofType').value;
+
+            if (includeSolarInstall && solarPower > 0) {
+                // Determine number of panels based on 430W panels
+                const numberOfPanels = Math.ceil((solarPower * 1000) / 430);
+
+                // Panel cost - e.g., 85 EUR per panel
+                const panelPrice = 85.00 * numberOfPanels;
+                items.push({ name: t.solarPanelsName, specs: `${numberOfPanels}x 430Wp`, price: panelPrice });
+
+                // Mounting material cost - e.g. pitched = 40 EUR/panel, flat = 55 EUR/panel
+                const mountingPricePerPanel = roofType === 'pitched' ? 40.00 : 55.00;
+                const mountingPrice = mountingPricePerPanel * numberOfPanels;
+                const roofSpec = roofType === 'pitched' ? t.optPitched : t.optFlat;
+                items.push({ name: t.solarMountingName, specs: roofSpec, price: mountingPrice });
+
+                // DC cabling
+                items.push({ name: t.solarCablingName, specs: 'Solarkabel 4mm² + MC4', price: 150.00 });
+
+                // Installation labor - base 350 + 40 per panel
+                const laborPrice = 350.00 + (40.00 * numberOfPanels);
+                items.push({ name: t.solarLaborName, specs: `${numberOfPanels} modules`, price: laborPrice });
+
+                // Scaffolding for pitched roof
+                if (roofType === 'pitched') {
+                    items.push({ name: t.scaffoldingName, specs: 'Veilig werken op hoogte', price: 250.00 });
+                }
             }
 
             items.forEach(item => {
